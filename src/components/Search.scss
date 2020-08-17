@@ -1,5 +1,11 @@
+.searchWrapper {
+  width: 100%;
+  margin: 20px 0;
+}
+
 .search {
   width: 312px;
+  margin: 0 auto;
 }
 
 .search label {
@@ -36,4 +42,17 @@
     box-shadow: 0 0 2px 1px rgb(98,188,133);
     border-color: rgb(98,188,133);
   }
+}
+
+.results {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.results img {
+  margin: 16px;
 }

@@ -21,23 +21,30 @@ const Search = ({label, placeholder}) => {
       cancelToken: cancelRequest.token
     }).then((result) => {
       if (result) {
-        console.log(result.data.photos)
-        setResults(result.data.photos.photo)
+        const images = mapImageUrls(result.data.photos.photo)
+        setResults(images)
       }
-      !result.data.photos.photo.length && setErrorMessage('There are no more search results')
-
+      !result.data.photos && setErrorMessage('There are no more search results')
     }).catch(function (thrown) {
       if (axios.isCancel(thrown)) {
-        console.log('Request canceled', thrown.message);
+        console.log('Request canceled');
       } else {
-        console.log(thrown)
+        console.log(thrown.message)
       }
     })
   }
+  console.log(results)
+
+  const mapImageUrls = images => (
+    images.map(image => ({
+      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}_z.(jpg|gif|png)`,
+      id: image.id
+    }))
+  )
 
   const handleChange = value => {
     cancelRequest && cancelRequest.cancel();
-    setValue(value)
+    setValue(value.trim())
   }
 
   useEffect(() => {
@@ -46,20 +53,29 @@ const Search = ({label, placeholder}) => {
   }, [value, pageNumber])
 
   return (
-    <div className='search'>
-      <label htmlFor='search-input'>{label}</label>
-      <input
-        type='search'
-        name='query'
-        id='search-input'
-        autoComplete='off'
-        data-testid='searchInput'
-        placeholder={placeholder}
-        value={value}
-        onChange={({target: {value}}) => {
-          handleChange(value)
-        }}
-      />
+    <div className = 'searchWrapper'>
+      <div className='search'>
+        <label htmlFor='search-input'>{label}</label>
+        <input
+          type='search'
+          name='query'
+          id='search-input'
+          autoComplete='off'
+          data-testid='searchInput'
+          placeholder={placeholder}
+          value={value}
+          onChange={({target: {value}}) => {
+            handleChange(value)
+          }}
+        />
+      </div>
+      <div className='results'>
+        {results && (
+          results.map(result => (
+            <img src={result.url} alt={value} key={result.id} />
+          ))
+        )}
+      </div>
     </div>
   )
 }
