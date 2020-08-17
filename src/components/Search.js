@@ -23,6 +23,7 @@ const Search = ({label, placeholder}) => {
       if (result) {
         const images = mapImageUrls(result.data.photos.photo)
         setResults(images)
+        console.log(result.data.photos)
       }
       !result.data.photos && setErrorMessage('There are no more search results')
     }).catch(function (thrown) {
@@ -37,7 +38,7 @@ const Search = ({label, placeholder}) => {
 
   const mapImageUrls = images => (
     images.map(image => ({
-      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}_z.(jpg|gif|png)`,
+      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}.jpg`,
       id: image.id
     }))
   )
@@ -72,7 +73,9 @@ const Search = ({label, placeholder}) => {
       <div className='results'>
         {results && (
           results.map(result => (
-            <img src={result.url} alt={value} key={result.id} />
+            <figure>
+              <img src={result.url} alt={value} key={result.id} />
+            </figure>
           ))
         )}
       </div>
