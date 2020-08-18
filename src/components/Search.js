@@ -21,31 +21,40 @@ const Search = ({label, placeholder}) => {
       cancelToken: cancelRequest.token
     }).then((result) => {
       if (result) {
-        const images = mapImageUrls(result.data.photos.photo)
+        const dataImages = result.data.photos.photo
+        !dataImages.length && setErrorMessage('There are no more search results')
+        const images = mapImageUrls(dataImages)
         setResults(images)
-        console.log(result.data.photos)
+        setLoading(false)
       }
-      !result.data.photos && setErrorMessage('There are no more search results')
     }).catch(function (thrown) {
       if (axios.isCancel(thrown)) {
         console.log('Request canceled');
       } else {
-        console.log(thrown.message)
+        setErrorMessage('Failed to fetch search results')
+        setLoading(false)
       }
     })
   }
-  console.log(results)
+  console.log(loading, value, results)
 
   const mapImageUrls = images => (
     images.map(image => ({
-      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}.jpg`,
+      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}_z.jpg`,
       id: image.id
     }))
   )
 
   const handleChange = value => {
     cancelRequest && cancelRequest.cancel();
-    setValue(value.trim())
+    if (!value) {
+      setValue('')
+      setResults([])
+      setLoading(false)
+    } else {
+      setValue(value.trim())
+      setLoading(true)
+    }
   }
 
   useEffect(() => {
@@ -73,8 +82,8 @@ const Search = ({label, placeholder}) => {
       <div className='results'>
         {results && (
           results.map(result => (
-            <figure>
-              <img src={result.url} alt={value} key={result.id} />
+            <figure key={result.id}>
+              <img src={result.url} alt={value} />
             </figure>
           ))
         )}
