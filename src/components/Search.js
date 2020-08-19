@@ -3,16 +3,16 @@ import axios from 'axios';
 import './Search.scss'
 
 const Search = ({label, placeholder}) => {
-  const [value, setValue] = useState('')
+  const [searchValue, setSearchValue] = useState('')
   const [loading, setLoading] = useState(false)
-  const [message, setErrorMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
   const [results, setResults] = useState([])
 
   let cancelRequest
   const pageNumber = 1
 
-  const fetchSearchResults = async (value, pageNumber) => {
-    const url = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=63f731d229d83176a34ad0ebacc961b4&tags=${value}&content_type=1&per_page=50&page=${pageNumber}&format=json&nojsoncallback=1`
+  const fetchSearchResults = async (searchValue, pageNumber) => {
+    const url = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=63f731d229d83176a34ad0ebacc961b4&tags=${searchValue}&content_type=1&per_page=50&page=${pageNumber}&format=json&nojsoncallback=1`
 
     const CancelToken = axios.CancelToken;
     cancelRequest = CancelToken.source();
@@ -36,7 +36,7 @@ const Search = ({label, placeholder}) => {
       }
     })
   }
-  console.log(loading, value, results)
+  console.log(loading, searchValue, results)
 
   const mapImageUrls = images => (
     images.map(image => ({
@@ -48,19 +48,19 @@ const Search = ({label, placeholder}) => {
   const handleChange = value => {
     cancelRequest && cancelRequest.cancel();
     if (!value) {
-      setValue('')
+      setSearchValue('')
       setResults([])
       setLoading(false)
     } else {
-      setValue(value.trim())
+      setSearchValue(value.trim())
       setLoading(true)
     }
   }
 
   useEffect(() => {
-    value && fetchSearchResults(value, pageNumber)
+    searchValue && fetchSearchResults(searchValue, pageNumber)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, pageNumber])
+  }, [searchValue, pageNumber])
 
   return (
     <div className = 'searchWrapper'>
@@ -73,17 +73,18 @@ const Search = ({label, placeholder}) => {
           autoComplete='off'
           data-testid='searchInput'
           placeholder={placeholder}
-          value={value}
+          value={searchValue}
           onChange={({target: {value}}) => {
             handleChange(value)
           }}
         />
+        {errorMessage && <span>{errorMessage}</span>}
       </div>
       <div className='results'>
         {results && (
           results.map(result => (
             <figure key={result.id}>
-              <img src={result.url} alt={value} />
+              <img src={result.url} alt={searchValue} />
             </figure>
           ))
         )}
