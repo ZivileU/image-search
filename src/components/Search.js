@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Loader from 'react-loader-spinner'
 import './Search.scss'
 
 const Search = ({label, placeholder}) => {
@@ -80,15 +81,27 @@ const Search = ({label, placeholder}) => {
         />
         {errorMessage && <span>{errorMessage}</span>}
       </div>
-      <div className='results'>
-        {results && (
-          results.map(result => (
-            <figure key={result.id}>
-              <img src={result.url} alt={searchValue} />
-            </figure>
-          ))
-        )}
-      </div>
+      {loading
+        ? (
+            <Loader
+              type='ThreeDots'
+              color='rgb(98,188,133)'
+              height={60}
+              width={60}
+              // timeout={3000} //3 secs
+            />
+        ) : (
+          <div className='results'>
+            {results && (
+              results.map(result => (
+                <figure key={result.id}>
+                  <img src={result.url} alt={searchValue} />
+                </figure>
+              ))
+            )}
+          </div>
+        )
+      }
     </div>
   )
 }
