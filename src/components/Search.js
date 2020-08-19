@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import debounce from 'lodash/debounce'
+import classnames from 'classnames'
 import Loader from 'react-loader-spinner'
 import './Search.scss'
 
@@ -8,9 +10,10 @@ const Search = ({label, placeholder}) => {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
   const [results, setResults] = useState([])
+  const [pageNumber, setPageNumber] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
 
   let cancelRequest
-  const pageNumber = 1
 
   const fetchSearchResults = async (searchValue, pageNumber) => {
     const url = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=63f731d229d83176a34ad0ebacc961b4&tags=${searchValue}&content_type=1&per_page=50&page=${pageNumber}&format=json&nojsoncallback=1`
@@ -22,11 +25,16 @@ const Search = ({label, placeholder}) => {
       cancelToken: cancelRequest.token
     }).then((result) => {
       if (result) {
-        const dataImages = result.data.photos.photo
-        !dataImages.length && setErrorMessage('There are no more search results')
-        const images = mapImageUrls(dataImages)
-        setResults(images)
+        const data = result.data.photos
+        const images = mapImageUrls(data.photo)
+        setResults([...results, ...images])
+        !data.photo.length && setErrorMessage('There are no more search results')
+        if (data.pages === data.page) {
+          setHasMore(false)
+          setErrorMessage('There are no more search results')
+        }
         setLoading(false)
+        console.log(result.data.photos)
       }
     }).catch(function (thrown) {
       if (axios.isCancel(thrown)) {
@@ -37,7 +45,20 @@ const Search = ({label, placeholder}) => {
       }
     })
   }
-  console.log(loading, searchValue, results)
+
+  window.onscroll = debounce(() => {
+    if (errorMessage || loading || !hasMore) return;
+    // Checks that the page has scrolled to the bottom
+    if (
+      window.innerHeight + document.documentElement.scrollTop
+      === document.documentElement.offsetHeight
+    ) {
+      setPageNumber(pageNumber + 1)
+      setLoading(true)
+    }
+  }, 1000)
+
+  console.log(pageNumber, loading, hasMore)
 
   const mapImageUrls = images => (
     images.map(image => ({
@@ -51,6 +72,8 @@ const Search = ({label, placeholder}) => {
     if (!value) {
       setSearchValue('')
       setResults([])
+      setPageNumber(1)
+      setErrorMessage(null)
       setLoading(false)
     } else {
       setSearchValue(value.trim())
@@ -64,7 +87,7 @@ const Search = ({label, placeholder}) => {
   }, [searchValue, pageNumber])
 
   return (
-    <div className = 'searchWrapper'>
+    <div className={classnames('searchWrapper', {loading})}>
       <div className='search'>
         <label htmlFor='search-input'>{label}</label>
         <input
@@ -79,29 +102,27 @@ const Search = ({label, placeholder}) => {
             handleChange(value)
           }}
         />
-        {errorMessage && <span>{errorMessage}</span>}
       </div>
-      {loading
-        ? (
-            <Loader
-              type='ThreeDots'
-              color='rgb(98,188,133)'
-              height={60}
-              width={60}
-              // timeout={3000} //3 secs
-            />
-        ) : (
-          <div className='results'>
-            {results && (
-              results.map(result => (
-                <figure key={result.id}>
-                  <img src={result.url} alt={searchValue} />
-                </figure>
-              ))
-            )}
-          </div>
-        )
+      <div className='results'>
+        {results && (
+          results.map(result => (
+            <figure key={result.id}>
+              <img src={result.url} alt={searchValue} />
+            </figure>
+          ))
+        )}
+      </div>
+      {errorMessage &&
+        <div className='errorMessage'>{errorMessage}</div>
       }
+      {loading && (
+        <Loader
+          type='ThreeDots'
+          color='rgb(98,188,133)'
+          height={80}
+          width={80}
+        />
+      )}
     </div>
   )
 }
