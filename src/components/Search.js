@@ -25,7 +25,6 @@ const Search = ({label, placeholder}) => {
     }).then((result) => {
       if (result) {
         const data = result.data.photos
-        console.log(data.photo)
         const images = mapImageUrls(data.photo)
         if (data.pages === 0) {
           setErrorMessage('No search results found')
