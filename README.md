@@ -49,7 +49,7 @@ An on scroll handler is checking if the user scrolled to the bottom of the page 
 
 ### Layout
 
-The search results are displayed using `flexBox` and are completely responsive. The boxes holding the images have fixed width and height to make sure the layout does not break if some images are not fetched. They have a 1px border to make it a bit more neat since the image size is different. The images are scaled down preserving the aspect ratio, to make sure they are not stretched.
+The search results are displayed using `flexBox` and are completely responsive. The boxes holding the images have fixed width and height so the layout does not break if some images are not fetched. They have a 1px border. The `object-fit` property is set to `cover` so the image is zoomed in to cover the image box without stretching.
 
 ### Improvements
 
