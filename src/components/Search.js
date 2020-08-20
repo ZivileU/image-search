@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import debounce from 'lodash/debounce'
 import Loader from 'react-loader-spinner'
@@ -80,6 +80,34 @@ const Search = ({label, placeholder}) => {
     }
   }
 
+  const useOnEscape = () => {
+    const inputReference = useRef()
+
+    useEffect(() => {
+      const handleKeyDown = event => {
+        if ((event.keyCode === 27) && (inputReference && inputReference.current.matches(':focus-within'))) {
+          setSearchValue('')
+          setResults([])
+          setPageNumber(1)
+          setErrorMessage(null)
+          setLoading(false)
+        }
+      }
+
+      window.addEventListener('keydown', handleKeyDown)
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown)
+      }
+    }, [])
+
+    return {
+      inputReference
+    }
+  }
+
+  const {inputReference} = useOnEscape()
+
   useEffect(() => {
     searchValue && fetchSearchResults(searchValue, pageNumber)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,6 +125,7 @@ const Search = ({label, placeholder}) => {
           data-testid='searchInput'
           placeholder={placeholder}
           value={searchValue}
+          ref={inputReference}
           onChange={({target: {value}}) => {
             handleChange(value)
           }}
@@ -119,8 +148,8 @@ const Search = ({label, placeholder}) => {
           <Loader
             type='ThreeDots'
             color='rgb(98,188,133)'
-            height={80}
-            width={80}
+            height={60}
+            width={60}
           />
         )}
       </div>
