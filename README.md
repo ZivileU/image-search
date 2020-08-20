@@ -37,32 +37,20 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+## Design decisions
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+I have used the Flickr `photos.search` API for the assignment, since it allows to search for public photos by tag names (documentation: https://www.flickr.com/services/api/flickr.photos.search.html). I think it's more efficient than fetching the photos first and then building a search on the client side. Since the photos are displayed in 4 column rows, I am fetching them in medium size (640px on the longest side). 50 per page, or one data call.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Data Fetching
 
-### Code Splitting
+I am fetching the data with an asynchronous function using `axios` since it automatically handles the Json data transformation. The data received is paginated and fetched one page at a time. The fetch function is called in the useEffect hook only when the search value or data page number changes to prevent unnecessary rerenders. I am using `axios CancelToken` to cancel data calls that are already in progress while the user is still typing the query, so when the user stops, only one data call is made.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+An on scroll handler is checking if the user scrolled to the bottom of the page and if so, the current page number is increased by one what triggers a new data call. I am using `debounce` from `lodash` to make the scroll check every half a second. Then the newly fetched results are appended after already existing ones and the user can keep on scrolling till there are no more results available for the current search.
 
-### Analyzing the Bundle Size
+### Layout
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+The search results are displayed using `flexBox` and are completely responsive. The boxes holding the images have fixed width and height to make sure the layout does not break if some images are not fetched. They have a 1px border to make it a bit more neat since the image size is different. The images are scaled down preserving the aspect ratio, to make sure they are not stretched.
 
-### Making a Progressive Web App
+### Improvements
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+To improve the component I would make the data url and inner data paths into props, so the component could be reusable. The API gives an `and/or` possibility to combine search tags. I would add this option as a checkbox.

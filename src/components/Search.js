@@ -54,7 +54,7 @@ const Search = ({label, placeholder}) => {
       setLoading(true)
       setPageNumber(pageNumber + 1)
     }
-  }, 1000)
+  }, 500)
 
   // Documentation for image url mapping: https://www.flickr.com/services/api/misc.urls.html
   const mapImageUrls = images => (
@@ -74,12 +74,12 @@ const Search = ({label, placeholder}) => {
       setErrorMessage(null)
       setLoading(false)
     } else {
-      setSearchValue(value.trim())
+      setSearchValue(value)
       setLoading(true)
     }
   }
 
-  //Clears the input value on escape press
+  //Clears the input value on escape key press
   useEffect(() => {
     const handleKeyDown = event => {
       if ((event.keyCode === 27) && (inputReference && inputReference.current.matches(':focus-within'))) {
