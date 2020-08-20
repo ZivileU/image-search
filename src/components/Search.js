@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import debounce from 'lodash/debounce'
-import classnames from 'classnames'
 import Loader from 'react-loader-spinner'
 import './Search.scss'
 
@@ -11,7 +10,6 @@ const Search = ({label, placeholder}) => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [results, setResults] = useState([])
   const [pageNumber, setPageNumber] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
 
   let cancelRequest
 
@@ -27,12 +25,13 @@ const Search = ({label, placeholder}) => {
       if (result) {
         const data = result.data.photos
         const images = mapImageUrls(data.photo)
-        setResults([...results, ...images])
-        !data.photo.length && setErrorMessage('There are no more search results')
+        if (data.pages === 0) {
+          setErrorMessage('No search results found')
+        }
         if (data.pages === data.page) {
-          setHasMore(false)
           setErrorMessage('There are no more search results')
         }
+        setResults([...results, ...images])
         setLoading(false)
         console.log(result.data.photos)
       }
@@ -47,18 +46,18 @@ const Search = ({label, placeholder}) => {
   }
 
   window.onscroll = debounce(() => {
-    if (errorMessage || loading || !hasMore) return;
+    if (errorMessage || loading ) return;
     // Checks that the page has scrolled to the bottom
     if (
       window.innerHeight + document.documentElement.scrollTop
       === document.documentElement.offsetHeight
     ) {
-      setPageNumber(pageNumber + 1)
       setLoading(true)
+      setPageNumber(pageNumber + 1)
     }
   }, 1000)
 
-  console.log(pageNumber, loading, hasMore)
+  console.log(pageNumber, loading)
 
   const mapImageUrls = images => (
     images.map(image => ({
@@ -87,11 +86,11 @@ const Search = ({label, placeholder}) => {
   }, [searchValue, pageNumber])
 
   return (
-    <div className={classnames('searchWrapper', {loading})}>
+    <div className='searchWrapper'>
       <div className='search'>
         <label htmlFor='search-input'>{label}</label>
         <input
-          type='search'
+          type='text'
           name='query'
           id='search-input'
           autoComplete='off'
@@ -115,14 +114,16 @@ const Search = ({label, placeholder}) => {
       {errorMessage &&
         <div className='errorMessage'>{errorMessage}</div>
       }
-      {loading && (
-        <Loader
-          type='ThreeDots'
-          color='rgb(98,188,133)'
-          height={80}
-          width={80}
-        />
-      )}
+      <div className='loaderWrapper'>
+        {loading && (
+          <Loader
+            type='ThreeDots'
+            color='rgb(98,188,133)'
+            height={80}
+            width={80}
+          />
+        )}
+      </div>
     </div>
   )
 }
