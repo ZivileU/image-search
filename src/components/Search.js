@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
 import debounce from 'lodash/debounce'
 import Loader from 'react-loader-spinner'
+import { mapImageUrls } from './search.helper'
 import './Search.scss'
 
 const Search = ({label, placeholder}) => {
@@ -24,6 +25,7 @@ const Search = ({label, placeholder}) => {
     }).then((result) => {
       if (result) {
         const data = result.data.photos
+        console.log(data.photo)
         const images = mapImageUrls(data.photo)
         if (data.pages === 0) {
           setErrorMessage('No search results found')
@@ -46,23 +48,13 @@ const Search = ({label, placeholder}) => {
 
   // Checks if the page has scrolled to the bottom and increases the page number to trigger data fetching
   window.onscroll = debounce(() => {
+    const {scrollTop, offsetHeight} = document.documentElement
     if (errorMessage || loading ) return;
-    if (
-      window.innerHeight + document.documentElement.scrollTop
-      === document.documentElement.offsetHeight
-    ) {
+    if (window.innerHeight + scrollTop === offsetHeight) {
       setLoading(true)
       setPageNumber(pageNumber + 1)
     }
   }, 500)
-
-  // Documentation for image url mapping: https://www.flickr.com/services/api/misc.urls.html
-  const mapImageUrls = images => (
-    images.map(image => ({
-      url: `https://farm${image.farm}.staticflickr.com/${image.server}/${image.id}_${image.secret}_z.jpg`,
-      id: image.id
-    }))
-  )
 
   // A bit ugly, but very reliable
   const handleChange = value => {
@@ -146,4 +138,4 @@ const Search = ({label, placeholder}) => {
   )
 }
 
-export default Search;
+export default Search
