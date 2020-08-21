@@ -45,7 +45,7 @@ I have used the Flickr `photos.search` API for the assignment, since it allows t
 
 I am fetching the data with an asynchronous function using `axios` since it automatically handles the Json data transformation. I have never used `axios` before and took the chance to try it out. The data received is paginated and fetched one page at a time. The fetch function is called in the useEffect hook only when the search value or data page number changes to prevent unnecessary rerenders. I am using `axios CancelToken` to cancel data calls that are already in progress while the user is still typing the query, so when the user stops, only one data call is made.
 
-An on scroll handler is checking if the user scrolled to the bottom of the page and if so, the current page number is increased by one what triggers a new data call. I am using `debounce` from `lodash` to make the scroll check every half a second. Then the newly fetched results are appended after already existing ones and the user can keep on scrolling till there are no more results available for the current search.
+An on scroll handler is checking if the user scrolled to the bottom of the page and if so, the current page number is increased by one what triggers a new data call. I am using `debounce` from `lodash` to make the scroll check every quarter of a second. Then the newly fetched results are appended after already existing ones and the user can keep on scrolling till there are no more results available for the current search.
 
 ### Layout
 

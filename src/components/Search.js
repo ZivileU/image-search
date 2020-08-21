@@ -11,7 +11,6 @@ const Search = ({label, placeholder}) => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [results, setResults] = useState([])
   const [pageNumber, setPageNumber] = useState(1)
-  const [hasMore, setHasMore] = useState(false)
   const inputReference = useRef()
 
   let cancelRequest
@@ -27,19 +26,14 @@ const Search = ({label, placeholder}) => {
       if (result) {
         const data = result.data.photos
         const images = mapImageUrls(data.photo)
-        (data.pages > data.page)
-          ? setHasMore(true)
-          : setHasMore(false)
-
         if ((data.pages === 0)) {
           setErrorMessage('No search results found')
         }
-        if (!hasMore && (data.pages === data.page)) {
+        if (data.pages === data.page) {
           setErrorMessage('There are no more search results')
         }
         setResults([...results, ...images])
         setLoading(false)
-        console.log(data)
       }
     }).catch(function (thrown) {
       if (axios.isCancel(thrown)) {
@@ -55,12 +49,12 @@ const Search = ({label, placeholder}) => {
   window.onscroll = debounce(() => {
     const {scrollTop, offsetHeight} = document.documentElement
 
-    if (errorMessage || loading || !hasMore) return
+    if (errorMessage || loading) return
     if (window.innerHeight + scrollTop === offsetHeight) {
-      hasMore && setPageNumber(pageNumber + 1)
+      setPageNumber(pageNumber + 1)
       setLoading(true)
     }
-  }, 500)
+  }, 250)
 
   // A bit ugly, but reliable
   const handleChange = value => {
